@@ -1,0 +1,48 @@
+{
+  "linters": {
+    "spelling": {
+      "type": "spelling"
+    },
+
+    "filename": {
+      "type": "filename"
+    },
+
+    "text": {
+      "type": "text",
+      "exclude": "(\\.(py|html|md)$)"
+    },
+
+    "text-html": {
+      "type": "text",
+      "include": "(\\.html$)",
+      "severity": {
+        "3": "disabled"
+      }
+    },
+
+    "merge-conflict": {
+      "type": "merge-conflict"
+    },
+
+    "pep8": {
+      "type": "pep8",
+      "include": "(\\.py$)",
+      "exclude": "(^tests/)"
+    },
+
+    "pep8_tests": {
+      "type": "pep8",
+      "include": "(^tests/.*\\.py$)",
+      "severity": {
+        "E501": "disabled"
+      }
+    },
+
+    "jshint": {
+      "type": "jshint",
+      "include": "(\\.js$)"
+    }
+  }
+}
+

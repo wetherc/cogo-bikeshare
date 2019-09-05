@@ -1,0 +1,51 @@
+# Ignore everything
+*
+
+# But descend into directories
+!*/
+
+# but still exclude generated folders
+*.egg-info/
+*.ipynb_checkpoints/
+*.vscode/
+*obj/
+
+# And permit certain filetypes
+!*.R
+!*.Rmd
+!*.md
+!*.css
+!*.txt
+!*.js
+!*.sql
+!*.json
+!*.sh
+!*.book
+!*.diviner
+!*.html
+!*.sas
+!*.py
+!*.sqlproj
+!*.dbmdl
+!*.sln
+!*.xml
+!*.bat
+!*.dtsx
+!*.dll
+!*.database
+!*.dtproj
+
+#add WASM filetypes
+!*.c
+!*.h
+
+#disclude the generated javascript interface
+rater.js
+
+
+# And dotfiles
+!.gitignore
+!.arclint
+!.arcunit
+!.arcconfig
+

@@ -1,0 +1,9 @@
+{
+  "phabricator.uri" : "https://phabricator.tbmh.org/",
+  "base": "git:merge-base(origin/master)",
+  "arc.land.onto.default": "master",
+  "arc.feature.start.default": "master",
+  "history.immutable": false,
+  "unit.engine": "NoseTestEngine"
+}
+
