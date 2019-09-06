@@ -1,5 +1,5 @@
 {
-  "phabricator.uri" : "https://phabricator.tbmh.org/",
+  "phabricator.uri": "https://phabricator.tbmh.org/",
   "base": "git:merge-base(origin/master)",
   "arc.land.onto.default": "master",
   "arc.feature.start.default": "master",

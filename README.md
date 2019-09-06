@@ -10,6 +10,7 @@ Just
 ```
 cd /path/to/cogo
 pip install -r requirements.txt
+pip install -e .
 jupyter lab
 ```
 and you're off to the races.

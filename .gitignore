@@ -22,7 +22,6 @@
 !*.sh
 !*.book
 !*.diviner
-!*.html
 !*.sas
 !*.py
 !*.sqlproj
