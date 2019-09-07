@@ -3,6 +3,7 @@
 # source is available at
 # https://nbviewer.jupyter.org/github/uber/h3-py-notebooks
 import json
+import pandas as pd
 import branca.colormap as cm
 from branca.colormap import linear
 
@@ -22,30 +23,29 @@ def counts_by_hexagon(df, resolution):
 
     df = df[[
         'start_station_lat', 'start_station_long',
-        'start_station_id', 'stop_station_id',
-        'date']]
+        'start_station_id', 'stop_station_id']]
     stations = (
         df[['start_station_lat', 'start_station_long',
             'start_station_id']]
         .drop_duplicates()
         .rename(
-            columns=[{
+            columns={
                 'start_station_lat': 'station_lat',
                 'start_station_long': 'station_long',
                 'start_station_id': 'station_id'
-            }]
+            }
         )
     )
     stations['hex_id'] = stations.apply(
         lambda row: h3.geo_to_h3(
-            row['start_station_lat'], row['start_station_long'],
+            row['station_lat'], row['station_long'],
             resolution),
         axis=1)
 
     df_agg = (
         pd.DataFrame(
             data=df.groupby(
-                by=['start_station_id', 'date'],
+                by=['start_station_id'],
                 as_index=False
             )
             .size()
@@ -57,14 +57,14 @@ def counts_by_hexagon(df, resolution):
     df_agg = df_agg.join(
         pd.DataFrame(
             data=df.groupby(
-                by=['stop_station_id', 'date'],
+                by=['stop_station_id'],
                 as_index=False
             )
             .size()
         )
         .rename_axis(index={'stop_station_id': 'station_id'})
         .rename(columns={0: 'arrival_count'})
-    )
+    ).reset_index()
     df_agg = pd.merge(df_agg, stations)
 
     df_agg['geometry'] = (
@@ -104,8 +104,9 @@ def hexagons_dataframe_to_geojson(df_hex, value_col, file_output=None):
     return geojson_result
 
 
-def choropleth_map(df_agg, value_col, border_color='black', fill_opacity=0.7,
-                   initial_map=None, with_legend=False, kind='linear'):
+def choropleth_map(df_agg, value_col, name, border_color='black',
+                   fill_opacity=0.7, initial_map=None, with_legend=False,
+                   kind='linear'):
     min_value = df_agg[value_col].min()
     max_value = df_agg[value_col].max()
     m = round((min_value + max_value) / 2, 0)
@@ -133,18 +134,9 @@ def choropleth_map(df_agg, value_col, border_color='black', fill_opacity=0.7,
             ['blue', 'white', 'red'],
             vmin=min_value,
             vmax=max_value)
-    elif kind == 'filled_nulls':
-        custom_cm = cm.LinearColormap(
-            ['sienna', 'green', 'yellow', 'red'],
-            index=[0, min_value, m, max_value],
-            vmin=min_value,
-            vmax=max_value)
 
     geojson_data = hexagons_dataframe_to_geojson(
         df_hex=df_agg, value_col=value_col)
-    name_layer = 'Choropleth ' + str(res)
-    if kind != 'linear':
-        name_layer = name_layer + kind
 
     GeoJson(
         geojson_data,
@@ -154,7 +146,7 @@ def choropleth_map(df_agg, value_col, border_color='black', fill_opacity=0.7,
             'weight': 1,
             'fillOpacity': fill_opacity
         },
-        name=name_layer
+        name=name
     ).add_to(initial_map)
 
     if with_legend is True:
