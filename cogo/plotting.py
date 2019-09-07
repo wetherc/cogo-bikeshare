@@ -33,7 +33,7 @@ def counts_by_hexagon(df, resolution):
                 'start_station_lat': 'station_lat',
                 'start_station_long': 'station_long',
                 'start_station_id': 'station_id'
-            ]}
+            }]
         )
     )
     stations['hex_id'] = stations.apply(
