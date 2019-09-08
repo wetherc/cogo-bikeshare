@@ -141,6 +141,7 @@ class Orchestrator:
                 'tick_number', 'timestamp', 'station_id',
                 'available_docks', 'used_docks']
         )
+        self.delays = []
         self._distribute_bikes(bike_count)
 
     def _instantiate_stations(self, _cogo_stations, _station_crosslinks,
@@ -231,7 +232,7 @@ class Orchestrator:
                     _dest, _travel_time = station.get_destination_station()
                     _lease = station.release_dock(_dest, _travel_time)
                     if _lease:
-                        logger.info(
+                        logger.debug(
                             f'Leased bike {_lease.bike_id} at {_timestamp} '
                             f'from station {_lease.last_departure_from}, '
                             f'heading to station {_lease.next_arrival_to}'
@@ -243,6 +244,11 @@ class Orchestrator:
                             f'{station.bikeshare_id} at '
                             f'{_timestamp}.'
                             ' The customer was sad.')
+                        self.delays.append({
+                            'timestamp': _timestamp,
+                            'station': station.bikeshare_id,
+                            'description': 'no bike was available'
+                        })
                 _stats = pd.DataFrame(
                     data={
                         'tick_number': tick,
@@ -279,5 +285,10 @@ class Orchestrator:
                             'No docks available at station '
                             f'{bike.next_arrival_to}... Waiting for one'
                             'to become available.')
+                        self.delays.append({
+                            'timestamp': _timestamp,
+                            'station': bike.next_arrival_to,
+                            'description': 'no dock was available'
+                        })
 
             tick += 1
