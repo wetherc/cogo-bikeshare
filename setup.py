@@ -8,7 +8,7 @@ setup(
     description='Packages helper functions to analyze COGO bike share usage',
     author='Chris Wetherill',
     author_email='chris@tbmh.org',
-    license='MIT',
+    license='Apache',
     test_suite='nose.collector',
     tests_require=['nose'],
     zip_safe=False)
