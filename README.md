@@ -1,8 +1,8 @@
 # Prerequisites
 
-This project uses Uber's [https://github.com/uber/h3](H3) system for geospatial indexing. Installation instructions can be found in their repository. Broadly, you'll need `cc`, `make`, and `cmake` available in your path. If you're on Mac, you can just `brew install h3` and you're good to go. Uber's documetion contains additional information for compiling from source if you're on a different platform or just enjoy the thrill of it.
+This project uses Uber's **[https://github.com/uber/h3 | H3]** system for geospatial indexing. Installation instructions can be found in their repository. Broadly, you'll need `cc`, `make`, and `cmake` available in your path. If you're on Mac, you can just `brew install h3` and you're good to go. Uber's documetion contains additional information for compiling from source if you're on a different platform or just enjoy the thrill of it.
 
-NOTE: `cmake` **must** also be in your path to install the H3 Python bindings.
+NOTE: `cmake` **must** also be in your path to install the H3 Python bindings. You may need to `brew install` this as well if you're on a Mac.
 
 # Installation and Usage
 
