@@ -1,6 +1,13 @@
 import math
+import sys
 import pandas as pd
 import numpy as np
+import logging
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger.setLevel(logging.INFO)
 
 
 # Initialize stations with N of M bikes
@@ -106,7 +113,7 @@ class Station:
 class Bike:
 
     def __init__(self, id: int):
-        self.bike_id = 0
+        self.bike_id = id
         self.is_docked = True
         self.last_departure_from = 0
         self.next_arrival_to = 0
@@ -129,6 +136,11 @@ class Orchestrator:
             station_crosslinks,
             hourly_trips)
         self.bikes_in_transit = []
+        self.simulation_statistics = pd.DataFrame(
+            columns=[
+                'tick_number', 'timestamp', 'station_id',
+                'available_docks', 'used_docks']
+        )
         self._distribute_bikes(bike_count)
 
     def _instantiate_stations(self, _cogo_stations, _station_crosslinks,
@@ -184,7 +196,7 @@ class Orchestrator:
             while (
                 len(self.stations[_stationlist[_counter]].docked_bikes) /
                 self.stations[_stationlist[_counter]].docks
-            ) > 0.75:
+            ) > 0.9:
                 if _counter == (len(_stationlist) - 1):
                     _counter = 0
                 else:
@@ -205,34 +217,65 @@ class Orchestrator:
     def run_simulation(self, start_hour: int, num_ticks: int):
         tick = 0
         while tick < num_ticks:
-            _current_hour = start_hour + (num_ticks // 60)
+            _current_hour = start_hour + (tick // 60)
             if _current_hour < 10:
                 _current_hour = '0' + str(_current_hour)
             else:
                 _current_hour = str(_current_hour)
+
+            _timestamp = _current_hour + ':' + (
+                str(tick % 60) if tick % 60 > 9 else '0' + str(tick % 60))
 
             for station in self.stations.values():
                 if station.should_bike_depart(_current_hour):
                     _dest, _travel_time = station.get_destination_station()
                     _lease = station.release_dock(_dest, _travel_time)
                     if _lease:
+                        logger.info(
+                            f'Leased bike {_lease.bike_id} at {_timestamp} '
+                            f'from station {_lease.last_departure_from}, '
+                            f'heading to station {_lease.next_arrival_to}'
+                        )
                         self.bikes_in_transit.append(_lease)
                     else:
-                        print(
-                            f'No bike was available from station '
-                            f'{station.bikeshare_id} at hour {_current_hour}. '
-                            'The customer was sad.')
+                        logger.debug(
+                            'No bike was available from station '
+                            f'{station.bikeshare_id} at '
+                            f'{_timestamp}.'
+                            ' The customer was sad.')
+                _stats = pd.DataFrame(
+                    data={
+                        'tick_number': tick,
+                        'timestamp': f'{_timestamp}',
+                        'station_id': station.bikeshare_id,
+                        'available_docks': (
+                            station.docks - len(station.docked_bikes)),
+                        'used_docks': len(station.docked_bikes)},
+                    index=[1]
+                )
+
+                self.simulation_statistics = self.simulation_statistics.append(
+                    _stats,
+                    ignore_index=True
+                )
 
             for bike in self.bikes_in_transit:
-                bike.remaining_transit_time -= 1
+                logger.debug(
+                    f'Bike {bike.bike_id} has {bike.remaining_transit_time} '
+                    f'left until it reaches station {bike.next_arrival_to}')
+                bike.remaining_transit_time -= 60  # transit time in seconds
                 if bike.remaining_transit_time <= 0:
+                    logger.debug(
+                        f'Bike {bike.bike_id} has arrived at'
+                        f'station {bike.next_arrival_to}'
+                    )
                     _lease = (
                         self.stations[bike.next_arrival_to].lease_dock(bike))
                     if _lease is True:
                         self.bikes_in_transit.pop(
                             self.bikes_in_transit.index(bike))
                     else:
-                        print(
+                        logger.debug(
                             'No docks available at station '
                             f'{bike.next_arrival_to}... Waiting for one'
                             'to become available.')
