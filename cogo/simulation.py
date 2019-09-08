@@ -288,7 +288,9 @@ class Orchestrator:
                         self.delays.append({
                             'timestamp': _timestamp,
                             'station': bike.next_arrival_to,
-                            'description': 'no dock was available'
+                            'description': (
+                                f'no dock available for bike {bike.bike_id}'
+                            )
                         })
 
             tick += 1
